@@ -1,29 +1,38 @@
 import bpy
 import speech_recognition as sr
 
-# Tạo một đối tượng Recognizer
-r = sr.Recognizer()
+# Khởi tạo đối tượng recognizer từ thư viện SpeechRecognition
+recognizer = sr.Recognizer()
 
-def recognize_speech():
-    # Ghi âm từ microphone
+# Hàm xử lý lệnh khi nhận được giọng nói từ người dùng
+def process_speech(text):
+    if "di chuyển" in text:
+        # Lệnh di chuyển đối tượng
+        bpy.context.object.location += bpy.context.object.location.normalized()
+    if "thay đổi màu" in text:
+        # Lệnh thay đổi màu sắc đối tượng
+        bpy.context.object.data.materials[0].diffuse_color = (1.0, 0.0, 0.0)  
+        
+
+# Hàm xử lý giọng nói
+def process_audio():
     with sr.Microphone() as source:
-        print("Hãy nói gì đó:")
-        audio = r.listen(source)
+        print("Lắng nghe...")
+        audio = recognizer.listen(source)
+        try:
+            # Sử dụng recognizer để chuyển đổi âm thanh thành văn bản
+            text = recognizer.recognize_google(audio, language="vi-VN")
+            print("Người dùng nói: " + text)
+            process_speech(text)
+        except sr.UnknownValueError:
+            print("Không nhận dạng được giọng nói.")
+        except sr.RequestError as e:
+            print("Lỗi trong quá trình xử lý giọng nói: {0}".format(e))
 
-    # Sử dụng Google Speech Recognition để nhận dạng giọng nói
-    try:
-        text = r.recognize_google(audio)
-        return text
-    except sr.UnknownValueError:
-        print("Không thể nhận dạng giọng nói")
-    except sr.RequestError as e:
-        print("Lỗi kết nối tới dịch vụ nhận dạng giọng nói: {0}".format(e))
+# Bắt đầu lắng nghe giọng nói liên tục
+def start_voice_interaction():
+    while True:
+        process_audio()
 
-# Gọi hàm nhận dạng giọng nói
-textt = recognize_speech()
-if textt:
-    textt = textt.lower()
-    print("You say: " + textt)
-    
-    if(textt != null):
-        change_color(object);
+# Gọi hàm start_voice_interaction để bắt đầu tương tác giọng nói
+start_voice_interaction()
